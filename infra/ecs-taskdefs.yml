@@ -1,0 +1,54 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Description: ECS Task Definitions for user, product, and order services
+Parameters:
+  UserImage:
+    Type: String
+  ProductImage:
+    Type: String
+  OrderImage:
+    Type: String
+  OrderQueueURL:
+    Type: String
+Resources:
+  UserTaskDef:
+    Type: AWS::ECS::TaskDefinition
+    Properties:
+      Family: user-service
+      NetworkMode: awsvpc
+      RequiresCompatibilities: [FARGATE]
+      Cpu: 256
+      Memory: 512
+      ContainerDefinitions:
+        - Name: user-service
+          Image: !Ref UserImage
+          PortMappings:
+            - ContainerPort: 5000
+  ProductTaskDef:
+    Type: AWS::ECS::TaskDefinition
+    Properties:
+      Family: product-service
+      NetworkMode: awsvpc
+      RequiresCompatibilities: [FARGATE]
+      Cpu: 256
+      Memory: 512
+      ContainerDefinitions:
+        - Name: product-service
+          Image: !Ref ProductImage
+          PortMappings:
+            - ContainerPort: 5000
+  OrderTaskDef:
+    Type: AWS::ECS::TaskDefinition
+    Properties:
+      Family: order-service
+      NetworkMode: awsvpc
+      RequiresCompatibilities: [FARGATE]
+      Cpu: 256
+      Memory: 512
+      ContainerDefinitions:
+        - Name: order-service
+          Image: !Ref OrderImage
+          PortMappings:
+            - ContainerPort: 5000
+          Environment:
+            - Name: ORDER_QUEUE_URL
+              Value: !Ref OrderQueueURL

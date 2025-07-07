@@ -1,0 +1,107 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Description: ECS Services and ALB
+Parameters:
+  VPCId:
+    Type: String
+  Subnet1:
+    Type: String
+  Subnet2:
+    Type: String
+  UserTaskDefArn:
+    Type: String
+  ProductTaskDefArn:
+    Type: String
+  OrderTaskDefArn:
+    Type: String
+Resources:
+  ALB:
+    Type: AWS::ElasticLoadBalancingV2::LoadBalancer
+    Properties:
+      Name: ecommerce-alb
+      Scheme: internet-facing
+      Subnets: [!Ref Subnet1, !Ref Subnet2]
+      SecurityGroups: []
+  ALBListener:
+    Type: AWS::ElasticLoadBalancingV2::Listener
+    Properties:
+      DefaultActions:
+        - Type: fixed-response
+          FixedResponseConfig:
+            StatusCode: 404
+            ContentType: text/plain
+            MessageBody: Not Found
+      LoadBalancerArn: !Ref ALB
+      Port: 80
+      Protocol: HTTP
+  UserTG:
+    Type: AWS::ElasticLoadBalancingV2::TargetGroup
+    Properties:
+      Name: user-tg
+      Port: 5000
+      Protocol: HTTP
+      VpcId: !Ref VPCId
+      TargetType: ip
+      HealthCheckPath: /login
+  ProductTG:
+    Type: AWS::ElasticLoadBalancingV2::TargetGroup
+    Properties:
+      Name: product-tg
+      Port: 5000
+      Protocol: HTTP
+      VpcId: !Ref VPCId
+      TargetType: ip
+      HealthCheckPath: /products
+  OrderTG:
+    Type: AWS::ElasticLoadBalancingV2::TargetGroup
+    Properties:
+      Name: order-tg
+      Port: 5000
+      Protocol: HTTP
+      VpcId: !Ref VPCId
+      TargetType: ip
+      HealthCheckPath: /order
+  UserService:
+    Type: AWS::ECS::Service
+    Properties:
+      Cluster: ecommerce-cluster
+      DesiredCount: 1
+      LaunchType: FARGATE
+      TaskDefinition: !Ref UserTaskDefArn
+      NetworkConfiguration:
+        AwsvpcConfiguration:
+          AssignPublicIp: ENABLED
+          Subnets: [!Ref Subnet1, !Ref Subnet2]
+      LoadBalancers:
+        - ContainerName: user-service
+          ContainerPort: 5000
+          TargetGroupArn: !Ref UserTG
+  ProductService:
+    Type: AWS::ECS::Service
+    Properties:
+      Cluster: ecommerce-cluster
+      DesiredCount: 1
+      LaunchType: FARGATE
+      TaskDefinition: !Ref ProductTaskDefArn
+      NetworkConfiguration:
+        AwsvpcConfiguration:
+          AssignPublicIp: ENABLED
+          Subnets: [!Ref Subnet1, !Ref Subnet2]
+      LoadBalancers:
+        - ContainerName: product-service
+          ContainerPort: 5000
+          TargetGroupArn: !Ref ProductTG
+  OrderService:
+    Type: AWS::ECS::Service
+    Properties:
+      Cluster: ecommerce-cluster
+      DesiredCount: 1
+      LaunchType: FARGATE
+      TaskDefinition: !Ref OrderTaskDefArn
+      NetworkConfiguration:
+        AwsvpcConfiguration:
+          AssignPublicIp: ENABLED
+          Subnets: [!Ref Subnet1, !Ref Subnet2]
+      LoadBalancers:
+        - ContainerName: order-service
+          ContainerPort: 5000
+          TargetGroupArn: !Ref OrderTG
