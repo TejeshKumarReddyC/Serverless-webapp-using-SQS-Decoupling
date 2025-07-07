@@ -1,0 +1,12 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Description: SQS for Order Service
+
+Resources:
+  OrderQueue:
+    Type: AWS::SQS::Queue
+    Properties:
+      QueueName: order-queue
+
+Outputs:
+  OrderQueueURL:
+    Value: !Ref OrderQueue
