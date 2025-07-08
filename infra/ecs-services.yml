@@ -1,5 +1,6 @@
 AWSTemplateFormatVersion: '2010-09-09'
-Description: ECS Services and ALB
+Description: ECS Services + Load Balancer for Ecommerce App
+
 Parameters:
   VPCId:
     Type: String
@@ -13,28 +14,72 @@ Parameters:
     Type: String
   OrderTaskDefArn:
     Type: String
+
 Resources:
+
+  ALBSecurityGroup:
+    Type: AWS::EC2::SecurityGroup
+    Properties:
+      GroupDescription: Allow HTTP access to ALB
+      VpcId: !Ref VPCId
+      SecurityGroupIngress:
+        - IpProtocol: tcp
+          FromPort: 80
+          ToPort: 80
+          CidrIp: 0.0.0.0/0
+      Tags:
+        - Key: Name
+          Value: alb-sg
+
   ALB:
     Type: AWS::ElasticLoadBalancingV2::LoadBalancer
     Properties:
       Name: ecommerce-alb
       Scheme: internet-facing
       Subnets: [!Ref Subnet1, !Ref Subnet2]
-      SecurityGroups: []
+      SecurityGroups: [!Ref ALBSecurityGroup]
+
   ALBListener:
     Type: AWS::ElasticLoadBalancingV2::Listener
     Properties:
+      LoadBalancerArn: !Ref ALB
+      Port: 80
+      Protocol: HTTP
       DefaultActions:
         - Type: fixed-response
           FixedResponseConfig:
             StatusCode: 404
             ContentType: text/plain
             MessageBody: Not Found
-      LoadBalancerArn: !Ref ALB
-      Port: 80
-      Protocol: HTTP
 
-  UserListenerRule:
+  UserTG:
+    Type: AWS::ElasticLoadBalancingV2::TargetGroup
+    Properties:
+      Port: 5000
+      Protocol: HTTP
+      VpcId: !Ref VPCId
+      TargetType: ip
+      HealthCheckPath: /login
+
+  ProductTG:
+    Type: AWS::ElasticLoadBalancingV2::TargetGroup
+    Properties:
+      Port: 5000
+      Protocol: HTTP
+      VpcId: !Ref VPCId
+      TargetType: ip
+      HealthCheckPath: /products
+
+  OrderTG:
+    Type: AWS::ElasticLoadBalancingV2::TargetGroup
+    Properties:
+      Port: 5000
+      Protocol: HTTP
+      VpcId: !Ref VPCId
+      TargetType: ip
+      HealthCheckPath: /order
+
+  UserRule:
     Type: AWS::ElasticLoadBalancingV2::ListenerRule
     Properties:
       ListenerArn: !Ref ALBListener
@@ -46,7 +91,7 @@ Resources:
         - Type: forward
           TargetGroupArn: !Ref UserTG
 
-  ProductListenerRule:
+  ProductRule:
     Type: AWS::ElasticLoadBalancingV2::ListenerRule
     Properties:
       ListenerArn: !Ref ALBListener
@@ -58,7 +103,7 @@ Resources:
         - Type: forward
           TargetGroupArn: !Ref ProductTG
 
-  OrderListenerRule:
+  OrderRule:
     Type: AWS::ElasticLoadBalancingV2::ListenerRule
     Properties:
       ListenerArn: !Ref ALBListener
@@ -69,33 +114,7 @@ Resources:
       Actions:
         - Type: forward
           TargetGroupArn: !Ref OrderTG
-  UserTG:
-    Type: AWS::ElasticLoadBalancingV2::TargetGroup
-    Properties:
-      Name: user-tg
-      Port: 5000
-      Protocol: HTTP
-      VpcId: !Ref VPCId
-      TargetType: ip
-      HealthCheckPath: /login
-  ProductTG:
-    Type: AWS::ElasticLoadBalancingV2::TargetGroup
-    Properties:
-      Name: product-tg
-      Port: 5000
-      Protocol: HTTP
-      VpcId: !Ref VPCId
-      TargetType: ip
-      HealthCheckPath: /products
-  OrderTG:
-    Type: AWS::ElasticLoadBalancingV2::TargetGroup
-    Properties:
-      Name: order-tg
-      Port: 5000
-      Protocol: HTTP
-      VpcId: !Ref VPCId
-      TargetType: ip
-      HealthCheckPath: /order
+
   UserService:
     Type: AWS::ECS::Service
     Properties:
@@ -111,6 +130,7 @@ Resources:
         - ContainerName: user-service
           ContainerPort: 5000
           TargetGroupArn: !Ref UserTG
+
   ProductService:
     Type: AWS::ECS::Service
     Properties:
@@ -126,6 +146,7 @@ Resources:
         - ContainerName: product-service
           ContainerPort: 5000
           TargetGroupArn: !Ref ProductTG
+
   OrderService:
     Type: AWS::ECS::Service
     Properties:
