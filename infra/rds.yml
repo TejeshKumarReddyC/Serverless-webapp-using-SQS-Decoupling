@@ -1,5 +1,13 @@
 AWSTemplateFormatVersion: '2010-09-09'
-Description: RDS MySQL Database for Ecommerce App
+Description: RDS MySQL for Ecommerce App (in correct VPC)
+
+Parameters:
+  DBUsername:
+    Type: String
+    Default: admin
+  DBPassword:
+    Type: String
+    NoEcho: true
 
 Resources:
 
@@ -17,6 +25,17 @@ Resources:
         - Key: Name
           Value: RdsSecurityGroup
 
+  DBSubnetGroup:
+    Type: AWS::RDS::DBSubnetGroup
+    Properties:
+      DBSubnetGroupDescription: Subnet group for RDS
+      SubnetIds:
+        - !ImportValue EcommercePublicSubnet1
+        - !ImportValue EcommercePublicSubnet2
+      Tags:
+        - Key: Name
+          Value: RdsSubnetGroup
+
   EcommerceDB:
     Type: AWS::RDS::DBInstance
     Properties:
@@ -25,6 +44,7 @@ Resources:
       AllocatedStorage: 20
       MasterUsername: !Ref DBUsername
       MasterUserPassword: !Ref DBPassword
+      DBSubnetGroupName: !Ref DBSubnetGroup
       VPCSecurityGroups:
         - !Ref RdsSecurityGroup
       DBName: ecommerce
@@ -33,12 +53,3 @@ Resources:
       Tags:
         - Key: Name
           Value: EcommerceDB
-
-Parameters:
-  DBUsername:
-    Type: String
-    Default: admin
-
-  DBPassword:
-    Type: String
-    NoEcho: true
