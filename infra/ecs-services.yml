@@ -68,7 +68,7 @@ Resources:
           Values: [/order*]
       Actions:
         - Type: forward
-          TargetGroupArn: !Ref OrderTG    
+          TargetGroupArn: !Ref OrderTG
   UserTG:
     Type: AWS::ElasticLoadBalancingV2::TargetGroup
     Properties:
