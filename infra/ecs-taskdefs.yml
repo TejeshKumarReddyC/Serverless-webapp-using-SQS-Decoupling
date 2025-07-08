@@ -1,54 +1,89 @@
 AWSTemplateFormatVersion: '2010-09-09'
-Description: ECS Task Definitions for user, product, and order services
+Description: ECS Task Definitions for Ecommerce Microservices
+
 Parameters:
-  UserImage:
+  ECRRepoUser:
     Type: String
-  ProductImage:
+  ECRRepoProduct:
     Type: String
-  OrderImage:
+  ECRRepoOrder:
     Type: String
-  OrderQueueURL:
-    Type: String
+
 Resources:
-  UserTaskDef:
+
+  ECSTaskExecutionRole:
+    Type: AWS::IAM::Role
+    Properties:
+      RoleName: ecsTaskExecutionRole1
+      AssumeRolePolicyDocument:
+        Version: "2012-10-17"
+        Statement:
+          - Effect: Allow
+            Principal:
+              Service: ecs-tasks.amazonaws.com
+            Action: sts:AssumeRole
+      ManagedPolicyArns:
+        - arn:aws:iam::aws:policy/service-role/AmazonECSTaskExecutionRolePolicy
+
+  UserTaskDefinition:
     Type: AWS::ECS::TaskDefinition
     Properties:
-      Family: user-service
-      NetworkMode: awsvpc
-      RequiresCompatibilities: [FARGATE]
+      Family: user-service-task
       Cpu: 256
       Memory: 512
+      NetworkMode: awsvpc
+      RequiresCompatibilities: [FARGATE]
+      ExecutionRoleArn: !GetAtt ECSTaskExecutionRole.Arn
       ContainerDefinitions:
         - Name: user-service
-          Image: !Ref UserImage
+          Image: !Ref ECRRepoUser
           PortMappings:
             - ContainerPort: 5000
-  ProductTaskDef:
+          LogConfiguration:
+            LogDriver: awslogs
+            Options:
+              awslogs-group: /ecs/user-service
+              awslogs-region: ap-south-1
+              awslogs-stream-prefix: ecs
+
+  ProductTaskDefinition:
     Type: AWS::ECS::TaskDefinition
     Properties:
-      Family: product-service
-      NetworkMode: awsvpc
-      RequiresCompatibilities: [FARGATE]
+      Family: product-service-task
       Cpu: 256
       Memory: 512
+      NetworkMode: awsvpc
+      RequiresCompatibilities: [FARGATE]
+      ExecutionRoleArn: !GetAtt ECSTaskExecutionRole.Arn
       ContainerDefinitions:
         - Name: product-service
-          Image: !Ref ProductImage
+          Image: !Ref ECRRepoProduct
           PortMappings:
             - ContainerPort: 5000
-  OrderTaskDef:
+          LogConfiguration:
+            LogDriver: awslogs
+            Options:
+              awslogs-group: /ecs/product-service
+              awslogs-region: ap-south-1
+              awslogs-stream-prefix: ecs
+
+  OrderTaskDefinition:
     Type: AWS::ECS::TaskDefinition
     Properties:
-      Family: order-service
-      NetworkMode: awsvpc
-      RequiresCompatibilities: [FARGATE]
+      Family: order-service-task
       Cpu: 256
       Memory: 512
+      NetworkMode: awsvpc
+      RequiresCompatibilities: [FARGATE]
+      ExecutionRoleArn: !GetAtt ECSTaskExecutionRole.Arn
       ContainerDefinitions:
         - Name: order-service
-          Image: !Ref OrderImage
+          Image: !Ref ECRRepoOrder
           PortMappings:
             - ContainerPort: 5000
-          Environment:
-            - Name: ORDER_QUEUE_URL
-              Value: !Ref OrderQueueURL
+          LogConfiguration:
+            LogDriver: awslogs
+            Options:
+              awslogs-group: /ecs/order-service
+              awslogs-region: ap-south-1
+              awslogs-stream-prefix: ecs
