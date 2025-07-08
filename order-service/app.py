@@ -9,7 +9,7 @@ queue_url = os.environ.get("ORDER_QUEUE_URL", "")
 def place_order():
     data = request.get_json()
     sqs.send_message(QueueUrl=queue_url, MessageBody=json.dumps(data))
-    return jsonify({"message": "Order placed successfully"}), 201
+    return jsonify({"message": "order placed successfully"}), 201
 
 @app.route('/orders', methods=['GET'])
 def list_orders():
