@@ -1,0 +1,53 @@
+name: Deploy to ECS using GitHub OIDC
+
+on:
+  push:
+    branches: [main]
+
+env:
+  AWS_REGION: ap-south-1
+  ECR_REPO_USER: 202583917032.dkr.ecr.ap-south-1.amazonaws.com/users
+  ECR_REPO_PRODUCT: 202583917032.dkr.ecr.ap-south-1.amazonaws.com/products
+  ECR_REPO_ORDER: 202583917032.dkr.ecr.ap-south-1.amazonaws.com/orders
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+
+    permissions:
+      id-token: write
+      contents: read
+
+    steps:
+    - name: Checkout source code
+      uses: actions/checkout@v4
+
+    - name: Configure AWS credentials using OIDC
+      uses: aws-actions/configure-aws-credentials@v4
+      with:
+        role-to-assume: arn:aws:iam::202583917032:role/githubconn
+        aws-region: ${{ env.AWS_REGION }}
+
+    - name: Log in to Amazon ECR
+      uses: aws-actions/amazon-ecr-login@v2
+
+    - name: Build, tag, and push user-service image
+      run: |
+        docker build -t $ECR_REPO_USER ./user-service
+        docker push $ECR_REPO_USER:latest
+
+    - name: Build, tag, and push product-service image
+      run: |
+        docker build -t $ECR_REPO_PRODUCT ./product-service
+        docker push $ECR_REPO_PRODUCT:latest
+
+    - name: Build, tag, and push order-service image
+      run: |
+        docker build -t $ECR_REPO_ORDER ./order-service
+        docker push $ECR_REPO_ORDER:latest
+
+    - name: Deploy to ECS services
+      run: |
+        aws ecs update-service --cluster ecommerce-cluster --service user-service --force-new-deployment
+        aws ecs update-service --cluster ecommerce-cluster --service product-service --force-new-deployment
+        aws ecs update-service --cluster ecommerce-cluster --service order-service --force-new-deployment
