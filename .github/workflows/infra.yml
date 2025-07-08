@@ -43,7 +43,7 @@ jobs:
 
     - name: Deploy ECS Task Definitions
       run: |
-        aws cloudformation deploy           --template-file infra/ecs-taskdefs.yml           --stack-name ecommerce-taskdefs           --parameter-overrides             ECRRepoUser=202583917032.dkr.ecr.ap-south-1.amazonaws.com/users:latest             ECRRepoProduct=202583917032.dkr.ecr.ap-south-1.amazonaws.com/products:latest             ECRRepoOrder=202583917032.dkr.ecr.ap-south-1.amazonaws.com/orders:latest             OrderQueueURL=https://sqs.${{ env.AWS_REGION }}.amazonaws.com/${{ env.ACCOUNT_ID }}/order-queue
+        aws cloudformation deploy           --template-file infra/ecs-taskdefs.yml           --stack-name ecommerce-taskdefs   --capabilities CAPABILITY_NAMED_IAM      --parameter-overrides             ECRRepoUser=202583917032.dkr.ecr.ap-south-1.amazonaws.com/users:latest             ECRRepoProduct=202583917032.dkr.ecr.ap-south-1.amazonaws.com/products:latest             ECRRepoOrder=202583917032.dkr.ecr.ap-south-1.amazonaws.com/orders:latest             OrderQueueURL=https://sqs.${{ env.AWS_REGION }}.amazonaws.com/${{ env.ACCOUNT_ID }}/order-queue
 
     - name: Deploy ECS Services
       run: |
