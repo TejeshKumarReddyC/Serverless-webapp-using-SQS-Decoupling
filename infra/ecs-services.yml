@@ -33,6 +33,42 @@ Resources:
       LoadBalancerArn: !Ref ALB
       Port: 80
       Protocol: HTTP
+
+  UserListenerRule:
+    Type: AWS::ElasticLoadBalancingV2::ListenerRule
+    Properties:
+      ListenerArn: !Ref ALBListener
+      Priority: 1
+      Conditions:
+        - Field: path-pattern
+          Values: [/user*]
+      Actions:
+        - Type: forward
+          TargetGroupArn: !Ref UserTG
+
+  ProductListenerRule:
+    Type: AWS::ElasticLoadBalancingV2::ListenerRule
+    Properties:
+      ListenerArn: !Ref ALBListener
+      Priority: 2
+      Conditions:
+        - Field: path-pattern
+          Values: [/product*]
+      Actions:
+        - Type: forward
+          TargetGroupArn: !Ref ProductTG
+
+  OrderListenerRule:
+    Type: AWS::ElasticLoadBalancingV2::ListenerRule
+    Properties:
+      ListenerArn: !Ref ALBListener
+      Priority: 3
+      Conditions:
+        - Field: path-pattern
+          Values: [/order*]
+      Actions:
+        - Type: forward
+          TargetGroupArn: !Ref OrderTG    
   UserTG:
     Type: AWS::ElasticLoadBalancingV2::TargetGroup
     Properties:
