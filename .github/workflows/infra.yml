@@ -50,8 +50,8 @@ jobs:
         VPC_ID=$(aws cloudformation describe-stacks --stack-name ecommerce-network --query "Stacks[0].Outputs[?OutputKey=='VPCId'].OutputValue" --output text)
         SUBNET1=$(aws ec2 describe-subnets --filters "Name=tag:Name,Values=PublicSubnet1" --query "Subnets[0].SubnetId" --output text)
         SUBNET2=$(aws ec2 describe-subnets --filters "Name=tag:Name,Values=PublicSubnet2" --query "Subnets[0].SubnetId" --output text)
-        USER_TASKDEF=$(aws ecs describe-task-definition --task-definition user-service --query "taskDefinition.taskDefinitionArn" --output text)
-        PRODUCT_TASKDEF=$(aws ecs describe-task-definition --task-definition product-service --query "taskDefinition.taskDefinitionArn" --output text)
-        ORDER_TASKDEF=$(aws ecs describe-task-definition --task-definition order-service --query "taskDefinition.taskDefinitionArn" --output text)
+        USER_TASKDEF=$(aws ecs describe-task-definition --task-definition user-service-task --query "taskDefinition.taskDefinitionArn" --output text)
+        PRODUCT_TASKDEF=$(aws ecs describe-task-definition --task-definition product-service-task --query "taskDefinition.taskDefinitionArn" --output text)
+        ORDER_TASKDEF=$(aws ecs describe-task-definition --task-definition order-service-task --query "taskDefinition.taskDefinitionArn"  --output text)
 
         aws cloudformation deploy           --template-file infra/ecs-services.yml           --stack-name ecommerce-services           --capabilities CAPABILITY_NAMED_IAM           --parameter-overrides             VPCId=$VPC_ID             Subnet1=$SUBNET1             Subnet2=$SUBNET2             UserTaskDefArn=$USER_TASKDEF             ProductTaskDefArn=$PRODUCT_TASKDEF             OrderTaskDefArn=$ORDER_TASKDEF
