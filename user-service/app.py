@@ -16,4 +16,4 @@ def login():
 
 @app.route('/health', methods=['GET'])
 def health():
-    return "User service is healthy", 200
+    return "User service is Healthy", 200
