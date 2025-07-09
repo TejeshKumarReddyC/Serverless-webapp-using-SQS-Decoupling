@@ -1,31 +1,27 @@
 from flask import Flask, jsonify, request
+from werkzeug.middleware.dispatcher import DispatcherMiddleware
 import boto3, os, json
 
-app = Flask(__name__)
+flask_app = Flask(__name__)
 
-# Initialize SQS
-region = "ap-south-1"
-sqs = boto3.client("sqs", region_name=region)
+sqs = boto3.client("sqs", region_name="ap-south-1")
 queue_url = os.environ.get("ORDER_QUEUE_URL", "")
 
-@app.route('/order', methods=['POST'])
+@flask_app.route('/order', methods=['POST'])
 def place_order():
-    if not queue_url:
-        return jsonify({"error": "ORDER_QUEUE_URL not configured"}), 500
-
     data = request.get_json()
-    try:
-        sqs.send_message(QueueUrl=queue_url, MessageBody=json.dumps(data))
-        return jsonify({"message": "Order placed successfully"}), 201
-    except Exception as e:
-        return jsonify({"error": str(e)}), 500
+    sqs.send_message(QueueUrl=queue_url, MessageBody=json.dumps(data))
+    return jsonify({"message": "Order placed successfully"}), 201
 
-@app.route('/orders', methods=['GET'])
+@flask_app.route('/orders', methods=['GET'])
 def list_orders():
-    return jsonify([
-        {"id": 1, "product_id": 1, "status": "confirmed"}
-    ]), 200
+    return jsonify([{"id": 1, "product_id": 1, "status": "confirmed"}])
 
-@app.route('/health', methods=['GET'])
+@flask_app.route('/health', methods=['GET'])
 def health():
-    return "Order service is healthy", 200
+    return "Order service healthy", 200
+
+# Dispatcher to map /order prefix
+app = DispatcherMiddleware(Flask('dummy_root'), {
+    '/order': flask_app
+})
