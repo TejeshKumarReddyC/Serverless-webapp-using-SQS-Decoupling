@@ -1,5 +1,5 @@
 AWSTemplateFormatVersion: '2010-09-09'
-Description: ECS Services + ALB for Ecommerce Microservices
+Description: ECS Services + ALB + CloudWatch Logs for Ecommerce Microservices
 
 Parameters:
   VPCId:
@@ -17,6 +17,26 @@ Parameters:
 
 Resources:
 
+  # --------- CloudWatch Log Groups ---------
+  UserLogGroup:
+    Type: AWS::Logs::LogGroup
+    Properties:
+      LogGroupName: /ecs/user-service
+      RetentionInDays: 7
+
+  ProductLogGroup:
+    Type: AWS::Logs::LogGroup
+    Properties:
+      LogGroupName: /ecs/product-service
+      RetentionInDays: 7
+
+  OrderLogGroup:
+    Type: AWS::Logs::LogGroup
+    Properties:
+      LogGroupName: /ecs/order-service
+      RetentionInDays: 7
+
+  # --------- ALB and Networking ---------
   ALBSecurityGroup:
     Type: AWS::EC2::SecurityGroup
     Properties:
@@ -27,9 +47,6 @@ Resources:
           FromPort: 80
           ToPort: 80
           CidrIp: 0.0.0.0/0
-      Tags:
-        - Key: Name
-          Value: alb-sg
 
   ALB:
     Type: AWS::ElasticLoadBalancingV2::LoadBalancer
@@ -52,6 +69,7 @@ Resources:
             ContentType: text/plain
             MessageBody: Not Found
 
+  # --------- Target Groups ---------
   UserTG:
     Type: AWS::ElasticLoadBalancingV2::TargetGroup
     Properties:
@@ -79,6 +97,7 @@ Resources:
       TargetType: ip
       HealthCheckPath: /order
 
+  # --------- Listener Rules ---------
   UserRule:
     Type: AWS::ElasticLoadBalancingV2::ListenerRule
     Properties:
@@ -115,11 +134,13 @@ Resources:
         - Type: forward
           TargetGroupArn: !Ref OrderTG
 
+  # --------- ECS Services ---------
   UserService:
     Type: AWS::ECS::Service
     DependsOn:
       - UserRule
       - ALBListener
+      - UserLogGroup
     Properties:
       Cluster: ecommerce-cluster
       DesiredCount: 1
@@ -139,6 +160,7 @@ Resources:
     DependsOn:
       - ProductRule
       - ALBListener
+      - ProductLogGroup
     Properties:
       Cluster: ecommerce-cluster
       DesiredCount: 1
@@ -158,6 +180,7 @@ Resources:
     DependsOn:
       - OrderRule
       - ALBListener
+      - OrderLogGroup
     Properties:
       Cluster: ecommerce-cluster
       DesiredCount: 1
