@@ -117,7 +117,7 @@ Resources:
       Priority: 1
       Conditions:
         - Field: path-pattern
-          Values: [/user*]
+          Values: [/user/*]
       Actions:
         - Type: forward
           TargetGroupArn: !Ref UserTG
@@ -129,7 +129,7 @@ Resources:
       Priority: 2
       Conditions:
         - Field: path-pattern
-          Values: [/product*]
+          Values: [/product/*]
       Actions:
         - Type: forward
           TargetGroupArn: !Ref ProductTG
@@ -141,7 +141,7 @@ Resources:
       Priority: 3
       Conditions:
         - Field: path-pattern
-          Values: [/order*]
+          Values: [/order/*]
       Actions:
         - Type: forward
           TargetGroupArn: !Ref OrderTG

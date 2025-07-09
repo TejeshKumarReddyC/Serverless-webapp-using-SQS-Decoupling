@@ -1,5 +1,4 @@
 from flask import Flask, jsonify, request
-from werkzeug.middleware.dispatcher import DispatcherMiddleware
 
 app = Flask(__name__)
 
@@ -16,8 +15,3 @@ def register():
 @app.route('/health', methods=['GET'])
 def health():
     return "User service healthy", 200
-
-# Dispatcher to map /user prefix
-app = DispatcherMiddleware(Flask('dummy_root'), {
-    '/user': app
-})
