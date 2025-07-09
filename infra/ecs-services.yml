@@ -36,7 +36,7 @@ Resources:
       LogGroupName: /ecs/order-service
       RetentionInDays: 7
 
-  # --------- ALB and Networking ---------
+  # --------- Security Groups ---------
   ALBSecurityGroup:
     Type: AWS::EC2::SecurityGroup
     Properties:
@@ -48,6 +48,18 @@ Resources:
           ToPort: 80
           CidrIp: 0.0.0.0/0
 
+  ECSSecurityGroup:
+    Type: AWS::EC2::SecurityGroup
+    Properties:
+      GroupDescription: Allow traffic from ALB to ECS tasks
+      VpcId: !Ref VPCId
+      SecurityGroupIngress:
+        - IpProtocol: tcp
+          FromPort: 5000
+          ToPort: 5000
+          SourceSecurityGroupId: !Ref ALBSecurityGroup
+
+  # --------- ALB and Listener ---------
   ALB:
     Type: AWS::ElasticLoadBalancingV2::LoadBalancer
     Properties:
@@ -150,6 +162,7 @@ Resources:
         AwsvpcConfiguration:
           AssignPublicIp: ENABLED
           Subnets: [!Ref Subnet1, !Ref Subnet2]
+          SecurityGroups: [!Ref ECSSecurityGroup]
       LoadBalancers:
         - ContainerName: user-service
           ContainerPort: 5000
@@ -170,6 +183,7 @@ Resources:
         AwsvpcConfiguration:
           AssignPublicIp: ENABLED
           Subnets: [!Ref Subnet1, !Ref Subnet2]
+          SecurityGroups: [!Ref ECSSecurityGroup]
       LoadBalancers:
         - ContainerName: product-service
           ContainerPort: 5000
@@ -190,6 +204,7 @@ Resources:
         AwsvpcConfiguration:
           AssignPublicIp: ENABLED
           Subnets: [!Ref Subnet1, !Ref Subnet2]
+          SecurityGroups: [!Ref ECSSecurityGroup]
       LoadBalancers:
         - ContainerName: order-service
           ContainerPort: 5000
