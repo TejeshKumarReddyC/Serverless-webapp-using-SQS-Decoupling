@@ -48,6 +48,6 @@ jobs:
 
     - name: Deploy to ECS services
       run: |
-        aws ecs update-service --cluster ecommerce-cluster --service ecommerce-services-UserService-IC1PLYb69s8a --force-new-deployment
-        aws ecs update-service --cluster ecommerce-cluster --service ecommerce-services-ProductService-bU5yo5cGFU6B --force-new-deployment
-        aws ecs update-service --cluster ecommerce-cluster --service ecommerce-services-OrderService-3P9JiGpA8oCX --force-new-deployment
+        aws ecs update-service --cluster ecommerce-cluster --service ecommerce-services-UserService-ANoElSAlYvzU --force-new-deployment
+        aws ecs update-service --cluster ecommerce-cluster --service ecommerce-services-ProductService-THRSzuwGYKjc --force-new-deployment
+        aws ecs update-service --cluster ecommerce-cluster --service ecommerce-services-UserService-ANoElSAlYvzU --force-new-deployment
