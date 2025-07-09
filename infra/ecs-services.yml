@@ -77,7 +77,7 @@ Resources:
       Protocol: HTTP
       VpcId: !Ref VPCId
       TargetType: ip
-      HealthCheckPath: /login
+      HealthCheckPath: /health
 
   ProductTG:
     Type: AWS::ElasticLoadBalancingV2::TargetGroup
@@ -86,7 +86,7 @@ Resources:
       Protocol: HTTP
       VpcId: !Ref VPCId
       TargetType: ip
-      HealthCheckPath: /products
+      HealthCheckPath: /health
 
   OrderTG:
     Type: AWS::ElasticLoadBalancingV2::TargetGroup
@@ -95,7 +95,7 @@ Resources:
       Protocol: HTTP
       VpcId: !Ref VPCId
       TargetType: ip
-      HealthCheckPath: /order
+      HealthCheckPath: /health
 
   # --------- Listener Rules ---------
   UserRule:
