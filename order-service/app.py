@@ -12,7 +12,7 @@ def place_order():
     sqs.send_message(QueueUrl=queue_url, MessageBody=json.dumps(data))
     return jsonify({"message": "Order placed successfully"}), 201
 
-@app.route('/orders', methods=['GET'])
+@app.route('/order/orders', methods=['GET'])
 def list_orders():
     return jsonify([{"id": 1, "product_id": 1, "status": "confirmed"}])
 
