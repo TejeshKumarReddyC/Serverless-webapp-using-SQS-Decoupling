@@ -6,7 +6,7 @@ app = Flask(__name__)
 sqs = boto3.client("sqs", region_name="ap-south-1")
 queue_url = os.environ.get("ORDER_QUEUE_URL", "")
 
-@app.route('/order', methods=['POST'])
+@app.route('/order/order', methods=['POST'])
 def place_order():
     data = request.get_json()
     sqs.send_message(QueueUrl=queue_url, MessageBody=json.dumps(data))
