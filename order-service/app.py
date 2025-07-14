@@ -6,7 +6,7 @@ app = Flask(__name__)
 
 # Initialize SQS client
 sqs = boto3.client('sqs', region_name='ap-south-1')  # Adjust region as needed
-QUEUE_URL = os.environ.get('ORDER_QUEUE_URL')
+QUEUE_URL = os.environ.get('ORDER_QUEUE_URL', "")
 
 @app.route('/order/order', methods=['POST'])
 def send_message():
