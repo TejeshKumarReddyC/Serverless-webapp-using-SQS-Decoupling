@@ -26,5 +26,4 @@ def send_message():
         return jsonify({'error': str(e)}), 500
 def health():
     return "Product service healthy", 200
-root@TR-6K5RGY3:~/ecom# vim order-service/app.py
 
