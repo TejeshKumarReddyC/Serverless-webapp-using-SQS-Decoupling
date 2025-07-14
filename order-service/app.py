@@ -24,6 +24,7 @@ def send_message():
         return jsonify({'message_id': response['MessageId']}), 200
     except Exception as e:
         return jsonify({'error': str(e)}), 500
-def health():
-    return "Product service healthy", 200
+@app.route('/health', methods=['GET'])
+def health_check():
+    return 'OK', 200
 
