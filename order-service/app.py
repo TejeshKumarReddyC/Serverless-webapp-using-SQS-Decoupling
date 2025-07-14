@@ -16,7 +16,8 @@ def place_order():
 @app.route('/order/orders', methods=['GET'])
 def list_orders():
     print(f"Queue URL: {queue_url}")
-    return jsonify([{"id": 1, "product_id": 1, "status": "confirmed"}])
+    return queue_url
+    #return jsonify([{"id": 1, "product_id": 1, "status": "confirmed"}])
 @app.route('/health', methods=['GET'])
 def health():
     return "Order service healthy", 200
